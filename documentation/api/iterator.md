@@ -18,26 +18,6 @@ Is true if the iterator can be expanded.
 
 Is true if the iterator can be shrunken.
 
-### expand(value)
-
-Expands the current generator around the given value while still honoring the
-constraints of the original generator. The given value should be the last value
-the generator has produced.
-
-You can use this method when a generator produces an interesting input and you
-want to search around that value.
-
-```js
-const iterator = integer({ min: -10000, max: 10000 }).values();
-
-iterator.expand(100);
-
-expect(iterator.take(10), "to equal", [100, 9015, 100, 5594, 119, 100, 31, 100, 100, 174]);
-```
-
-As you can see the expanded iterator will produce values around `100` as that is
-our expansion value.
-
 ### next()
 
 Produces a new value based on the [generator](../generator/) that this iterator
@@ -46,48 +26,95 @@ was created from.
 ```js
 const integerIterator = integer.values();
 
-expect([integerIterator.next(), integerIterator.next(), integerIterator.next()], "to equal", [
-  -2260084377780223,
-  5342043492581377,
-  8119347222413313
-]);
+expect(
+  [integerIterator.next(), integerIterator.next(), integerIterator.next()],
+  "to equal",
+  [-2260084377780223, 5342043492581377, 8119347222413313]
+);
 ```
-
-### shrink(value)
-
-Returns a new generator that is shunken around the given value while still
-honoring the constraints of the original generator.
-
-```js
-integerIterator.shrink(1000);
-```
-
-This will shrink the iterator to produce values between `0` and `1000`.
-
-```js
-expect(integerIterator.take(5), "to equal", [183, 732, 780, 599, 597]);
-```
-
-If we shrink the iterator again with the smallest produces value from the last
-run. It will produce values been `0` and `183`.
-
-```js
-integerIterator.shrink(183);
-
-expect(integerIterator.take(5), "to equal", [28, 82, 28, 18, 10]);
-```
-
-The idea is that every time you find interesting input, you can try to search
-for a smaller input by shrinking the iterator.
 
 ### take(n)
 
 Produces `n` items with the generator and return them as an array:
 
 ```js
-expect(integer.values().take(3), "to equal", [
-  -2260084377780223,
-  5342043492581377,
-  8119347222413313
+expect(integerIterator.take(3), "to equal", [
+  -5702731889115135,
+  4179231256870913,
+  5038465087438849
 ]);
 ```
+
+### shrink()
+
+Returns a new generator that is shunken around the last generated value while
+still honoring the constraints of the original generator.
+
+```js
+const smallIntegersIterator = integer({ min: -10000, max: 10000 }).values();
+
+expect(smallIntegersIterator.next(), "to equal", -2509);
+
+smallIntegersIterator.shrink();
+```
+
+This will shrink the iterator to produce values between `0` and `-2509`.
+
+```js
+expect(smallIntegersIterator.take(5), "to equal", [
+  -510,
+  -123,
+  -2049,
+  -672,
+  -552
+]);
+```
+
+If we shrink the iterator again, it will produce values been `0` and `-552`.
+
+```js
+smallIntegersIterator.shrink();
+
+expect(smallIntegersIterator.take(5), "to equal", [
+  -221,
+  -222,
+  -466,
+  -306,
+  -466
+]);
+```
+
+The idea is that every time you find interesting input, you can try to search
+for a smaller input by shrinking the iterator.
+
+### expand()
+
+Expands the current generator around the last generated value while still
+honoring the constraints of the original generator.
+
+You can use this method when a generator produces an interesting input and you
+want to search around that value.
+
+```js
+const positiveIterator = natural({ min: 1, max: 1000 }).values();
+
+expect(positiveIterator.next(), "to equal", 375);
+
+positiveIterator.expand();
+
+expect(positiveIterator.take(10), "to equal", [
+  951,
+  375,
+  780,
+  394,
+  375,
+  306,
+  375,
+  375,
+  449,
+  375
+]);
+```
+
+As you can see the expanded iterator will produce values around `375` as that is
+our expansion value.

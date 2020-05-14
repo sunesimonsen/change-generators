@@ -7,7 +7,7 @@ class MagicIntegerGenerator extends Generator {
     super("magicInteger");
   }
 
-  expand(generated) {
+  expand(generated, context) {
     return new WeightedGenerator([[this, 1], [generated, 1.5]]);
   }
 

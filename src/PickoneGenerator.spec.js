@@ -33,7 +33,10 @@ describe("PickoneGenerator", () => {
 
   describe("shrink", () => {
     it("returns a constant generator with the given value", () => {
-      expect(generator.shrink(5), "to satisfy", { options: { value: 5 } }).and(
+      const iterator = generator.values();
+      iterator.next();
+      iterator.shrink();
+      expect(iterator.generator, "to satisfy", { options: { value: 3 } }).and(
         "to be a",
         ConstantGenerator
       );
@@ -42,7 +45,10 @@ describe("PickoneGenerator", () => {
 
   describe("expand", () => {
     it("returns a new generator that is more likely to pick the given item", () => {
-      expect(generator.expand(5), "to yield items", [7, 5, 7, 5, 5, 5, 4, 0]);
+      const iterator = generator.values();
+      iterator.next();
+      iterator.expand();
+      expect(iterator, "to yield items", [3, 3, 7, 3, 3, 3, 4, 0]);
     });
   });
 
@@ -67,8 +73,11 @@ describe("PickoneGenerator", () => {
 
     describe("shrink", () => {
       it("returns the shrunken generator that it was given", () => {
-        const value = generator.first();
-        expect(generator.shrink(value), "to satisfy", {
+        const iterator = generator.values();
+        iterator.next();
+        iterator.shrink();
+
+        expect(iterator.generator, "to satisfy", {
           generatorName: "integer",
           options: { min: 0, max: 80 }
         });
@@ -77,11 +86,12 @@ describe("PickoneGenerator", () => {
 
     describe("expand", () => {
       it("returns a new generator that is more likely to pick expansions around the given item", () => {
-        const value = generator.take(2)[1];
+        const iterator = generator.values();
+        iterator.next();
+        iterator.next();
+        iterator.expand();
 
-        expect(value, "to equal", "5SSlG");
-
-        expect(generator.expand(value), "to yield items", [
+        expect(iterator, "to yield items", [
           5,
           "Sk5WSlG19",
           "CM[RId@SYmHea(*)P7C",

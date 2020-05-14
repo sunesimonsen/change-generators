@@ -77,9 +77,9 @@ describe("TreeGenerator", () => {
 
     describe("expand", () => {
       it("produces a generator that will generate trees similar to the given value", () => {
-        const value = generator.first();
+        const iterator = generator.values();
 
-        expect(value, "to equal", [
+        expect(iterator.next(), "to equal", [
           80,
           [96, [18, 73], 78, 60],
           [[60, 15], 45],
@@ -87,7 +87,9 @@ describe("TreeGenerator", () => {
           10
         ]);
 
-        expect(generator.expand(value).take(3), "to equal", [
+        iterator.expand();
+
+        expect(iterator, "to yield items", [
           [45, [[15, 96], 43], [80, 60, 60, 18, 78], 73, 10, 15],
           [60, 96, [18, 73], [10, [15, 15], 45], 45, 80, 78, 60],
           [15, [[96, [73, 60], 26], 45], 15]
@@ -125,10 +127,13 @@ describe("TreeGenerator", () => {
 
     describe("expand", () => {
       it("honor the constaints", () => {
-        const value = generator.first();
+        const iterator = generator.values();
+
+        iterator.next();
+        iterator.expand();
 
         expect(
-          generator.expand(value),
+          iterator,
           "to yield items satisfying",
           "to have size satisfying",
           "to be within",
@@ -163,10 +168,13 @@ describe("TreeGenerator", () => {
 
     describe("expand", () => {
       it("honor the constaints", () => {
-        const value = generator.first();
+        const iterator = generator.values();
+
+        iterator.next();
+        iterator.expand();
 
         expect(
-          generator.expand(value),
+          iterator,
           "to yield items satisfying",
           "to have size satisfying",
           "to be within",

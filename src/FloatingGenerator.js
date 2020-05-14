@@ -34,7 +34,7 @@ class FloatingGenerator extends Generator {
     }
   }
 
-  expand(value) {
+  expand(value, context) {
     return new WeightedGenerator([
       [new ConstantGenerator(value), 2],
       [

@@ -26,7 +26,7 @@ class StringSplicerGenerator extends Generator {
     return new StringSplicerGenerator(text, { min });
   }
 
-  expand(text) {
+  expand(text, context) {
     return new WeightedGenerator([
       [this, 1],
       [new ConstantGenerator(text), 1.5]

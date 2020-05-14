@@ -17,6 +17,23 @@ module.exports = require("unexpected")
   })
   .addType({
     base: "object",
+    name: "GeneratorIterator",
+    identify: v => v && v.isGeneratorIterator,
+    inspect: (v, depth, output, inspect) => {
+      output.jsFunctionName(v.generator.generatorName);
+
+      if (typeof v.options !== "undefined") {
+        output
+          .text("(")
+          .appendInspected(v.generator.options)
+          .text(").")
+          .jsFunctionName("values")
+          .text("()");
+      }
+    }
+  })
+  .addType({
+    base: "object",
     name: "MappingGenerator",
     identify: v => v && v.isMappedGenerator,
     inspect: (v, depth, output, inspect) => {
@@ -35,14 +52,14 @@ module.exports = require("unexpected")
     }
   )
   .addAssertion(
-    "<Generator> to yield items <array>",
+    "<Generator|GeneratorIterator> to yield items <array>",
     (expect, subject, values) => {
       expect.errorMode = "nested";
       expect(subject.take(values.length), "to equal", values);
     }
   )
   .addAssertion(
-    "<Generator> to yield items satisfying <any>",
+    "<Generator|GeneratorIterator> to yield items satisfying <any>",
     (expect, subject, value) => {
       expect.errorMode = "nested";
       expect(
@@ -53,7 +70,7 @@ module.exports = require("unexpected")
     }
   )
   .addAssertion(
-    "<Generator> to yield items satisfying <assertion>",
+    "<Generator|GeneratorIterator> to yield items satisfying <assertion>",
     (expect, subject) => {
       expect.errorMode = "nested";
       subject.take(10).forEach(item => {
@@ -62,15 +79,14 @@ module.exports = require("unexpected")
     }
   )
   .addAssertion(
-    "<Generator> to shrink towards <any>",
+    "<GeneratorIterator> to shrink towards <any>",
     (expect, subject, value) => {
       expect.errorMode = "nested";
 
       let count = 0;
-      let iterator = subject.values();
-      while (iterator.isShrinkable && count < 100) {
-        const value = iterator.next();
-        iterator.shrink(value);
+      while (subject.isShrinkable && count < 100) {
+        subject.next();
+        subject.shrink();
         count++;
       }
 
@@ -78,7 +94,15 @@ module.exports = require("unexpected")
         expect.fail("Could not shrink in 100 iterations");
       }
 
-      expect(iterator.next(), "to equal", value);
+      expect(subject.next(), "to equal", value);
+    }
+  )
+  .addAssertion(
+    "<Generator> to shrink towards <any>",
+    (expect, subject, value) => {
+      expect.errorMode = "bubble";
+
+      expect(subject.values(), "to shrink towards", value);
     }
   )
   .addAssertion("<number> [not] to be an integer", (expect, subject) => {

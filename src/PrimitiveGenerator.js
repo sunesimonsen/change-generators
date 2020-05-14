@@ -17,12 +17,12 @@ class PrimitiveGenerator extends Generator {
     ]);
   }
 
-  shrink(value) {
-    return this.composedGenerator.shrink(value);
+  shrink(value, context) {
+    return this.composedGenerator.shrink(value, context);
   }
 
-  expand(value) {
-    return this.composedGenerator.expand(value);
+  expand(value, context) {
+    return this.composedGenerator.expand(value, context);
   }
 
   generate(chance, context) {

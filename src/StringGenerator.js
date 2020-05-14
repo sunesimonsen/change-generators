@@ -20,7 +20,7 @@ class StringGenerator extends Generator {
     return new StringSplicerGenerator(text, { min: this.options.min });
   }
 
-  expand(data) {
+  expand(data, context) {
     return this.map((text, chance) => {
       const margin = Math.max(
         Math.min(

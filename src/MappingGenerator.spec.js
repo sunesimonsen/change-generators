@@ -43,9 +43,12 @@ describe("MappingGenerator", () => {
 
   describe("expand", () => {
     it("expands the parent generator and maps it again", () => {
-      const value = mapGenerator.first();
+      const iterator = mapGenerator.values();
 
-      expect(mapGenerator.expand(value), "to yield items", [
+      iterator.next();
+      iterator.expand();
+
+      expect(iterator, "to yield items", [
         "E)1(N25SSLGLTEH#YSK0",
         "A(N25SSLGLHEH#YJK09",
         "(%25SSLGLHEH)YSK0U",

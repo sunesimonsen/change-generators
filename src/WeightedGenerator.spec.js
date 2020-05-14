@@ -44,16 +44,26 @@ describe("WeightedGenerator", () => {
 
   describe("shrink", () => {
     it("returns a constant generator with the given value", () => {
-      expect(generator.shrink("four"), "to satisfy", {
-        options: { value: "four" }
+      const iterator = generator.values();
+
+      iterator.next();
+      iterator.shrink();
+
+      expect(iterator.generator, "to satisfy", {
+        options: { value: "one" }
       }).and("to be a", ConstantGenerator);
     });
   });
 
   describe("expand", () => {
     it("return new weighted generator where the found item is more likely to get picked again", () => {
-      expect(generator.expand("four"), "to satisfy", {
-        options: [["one", 50], ["two", 10], ["three", 30], ["four", 50 * 1.5]]
+      const iterator = generator.values();
+
+      iterator.next();
+      iterator.expand();
+
+      expect(iterator.generator, "to satisfy", {
+        options: [["two", 10], ["three", 30], ["four", 10], ["one", 50 * 1.5]]
       }).and("to be a", WeightedGenerator);
     });
   });
@@ -79,8 +89,12 @@ describe("WeightedGenerator", () => {
 
     describe("shrink", () => {
       it("returns the shrunken generator that it was given", () => {
-        const value = generator.first();
-        expect(generator.shrink(value), "to satisfy", {
+        const iterator = generator.values();
+
+        iterator.next();
+        iterator.shrink();
+
+        expect(iterator.generator, "to satisfy", {
           generatorName: "stringSplicer",
           options: { text: "n25SSlGlheH#ySk0Wbe)19*pa", min: 5 }
         });
@@ -89,9 +103,12 @@ describe("WeightedGenerator", () => {
 
     describe("expand", () => {
       it("returns a weighted generator where the found item is expanded and the weight is increased", () => {
-        const value = generator.first();
+        const iterator = generator.values();
 
-        expect(generator.expand(value), "to yield items", [
+        iterator.next();
+        iterator.expand();
+
+        expect(iterator, "to yield items", [
           "TwTMaFbvMTDkdv[BrHg6ToCM[RId@S",
           "n25SSlGlheH#ySk0Wbe)19*pa",
           "n25SSlG&heH#ySk0Wbe)19*pa",

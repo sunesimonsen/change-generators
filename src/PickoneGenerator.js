@@ -14,21 +14,23 @@ class PickoneGenerator extends Generator {
     }
   }
 
-  shrink(item) {
-    if (this.lastUnwrappedValue === item && this.lastValue.shrink) {
-      return this.lastValue.shrink(item);
+  shrink(item, context) {
+    const lastValue = context.childContext(this).get("lastValue");
+
+    if (lastValue && lastValue.shrink) {
+      return lastValue.shrink(item, context);
     } else {
       return new ConstantGenerator(item);
     }
   }
 
-  expand(item) {
-    const expandableItem =
-      this.lastUnwrappedValue === item && this.lastValue.expand;
+  expand(item, context) {
+    const lastValue = context.childContext(this).get("lastValue");
+    const expandableItem = lastValue && lastValue.expand;
 
     return new WeightedGenerator([
       [this, 10],
-      [expandableItem ? this.lastValue.expand(item) : item, 15]
+      [expandableItem ? lastValue.expand(item, context) : item, 15]
     ]);
   }
 
@@ -36,11 +38,11 @@ class PickoneGenerator extends Generator {
     const { items } = this.options;
 
     const index = chance.natural({ max: items.length - 1 });
-    this.lastValue = items[index];
+    const value = items[index];
 
-    this.lastUnwrappedValue = unwrap(this.lastValue, chance, context);
+    context.childContext(this).set("lastValue", value);
 
-    return this.lastUnwrappedValue;
+    return unwrap(value, chance, context);
   }
 }
 

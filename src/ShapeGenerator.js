@@ -19,16 +19,16 @@ const containsGeneratorsMatching = (shape, predicate) => {
   }
 };
 
-const shrink = (shape, generated) => {
+const shrink = (shape, generated, context) => {
   if (!shape) {
     return shape;
   } else if (Array.isArray(shape)) {
-    return shape.map((item, i) => shrink(item, generated[i]));
+    return shape.map((item, i) => shrink(item, generated[i]), context);
   } else if (shape.isGenerator) {
-    return shape.shrink ? shape.shrink(generated) : shape;
+    return shape.shrink ? shape.shrink(generated, context) : shape;
   } else if (typeof shape === "object") {
     return Object.keys(shape).reduce((result, key) => {
-      result[key] = shrink(shape[key], generated[key]);
+      result[key] = shrink(shape[key], generated[key], context);
       return result;
     }, {});
   } else {
@@ -36,16 +36,16 @@ const shrink = (shape, generated) => {
   }
 };
 
-const expand = (shape, generated) => {
+const expand = (shape, generated, context) => {
   if (!shape) {
     return shape;
   } else if (Array.isArray(shape)) {
-    return shape.map((item, i) => expand(item, generated[i]));
+    return shape.map((item, i) => expand(item, generated[i], context));
   } else if (shape.isGenerator) {
-    return shape.expand ? shape.expand(generated) : shape;
+    return shape.expand ? shape.expand(generated, context) : shape;
   } else if (typeof shape === "object") {
     return Object.keys(shape).reduce((result, key) => {
-      result[key] = expand(shape[key], generated[key]);
+      result[key] = expand(shape[key], generated[key], context);
       return result;
     }, {});
   } else {
@@ -58,26 +58,26 @@ class ShapeGenerator extends Generator {
     super("shape", shape);
   }
 
-  shrink(generated) {
+  shrink(generated, context) {
     const isShrinkable = containsGeneratorsMatching(this.options, generator =>
       Boolean(generator.shrink)
     );
 
     if (isShrinkable) {
-      return new ShapeGenerator(shrink(this.options, generated));
+      return new ShapeGenerator(shrink(this.options, generated, context));
     } else {
       return new ConstantGenerator(generated);
     }
   }
 
-  expand(generated) {
+  expand(generated, context) {
     const isExpandable = containsGeneratorsMatching(this.options, generator =>
       Boolean(generator.expand)
     );
 
     if (isExpandable) {
       return new WeightedGenerator([
-        [new ShapeGenerator(expand(this.options, generated)), 1],
+        [new ShapeGenerator(expand(this.options, generated, context)), 1],
         [new ConstantGenerator(generated), 1.5]
       ]);
     } else {

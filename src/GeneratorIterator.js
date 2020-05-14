@@ -2,6 +2,8 @@ const chanceCache = require("./chanceCache");
 const Chance = require("chance");
 const Context = require("./Context");
 
+const uninitialized = {};
+
 class GeneratorIterator {
   constructor(generator, { seed = 42, skipSeedCache = false } = {}) {
     this.isGeneratorIterator = true;
@@ -10,6 +12,7 @@ class GeneratorIterator {
     this.generator = generator;
     this.seed = seed == null ? Math.round(Math.random() * 10000) : seed;
     this.context = new Context();
+    this.generated = uninitialized;
 
     if (skipSeedCache) {
       this.chance = new Chance(seed);
@@ -18,17 +21,17 @@ class GeneratorIterator {
     }
   }
 
-  shrink(value) {
-    if (this.isShrinkable) {
-      this.generator = this.generator.shrink(value);
+  shrink() {
+    if (this.generated !== uninitialized && this.isShrinkable) {
+      this.generator = this.generator.shrink(this.generated, this.context);
       this.context = new Context();
       this.isShrinkable = Boolean(this.generator.shrink);
     }
   }
 
-  expand(value) {
-    if (this.isExpandable) {
-      this.generator = this.generator.expand(value);
+  expand() {
+    if (this.generated !== uninitialized && this.isExpandable) {
+      this.generator = this.generator.expand(this.generated, this.context);
       this.context = new Context();
       this.isExpandable = Boolean(this.generator.expand);
     }
@@ -49,7 +52,8 @@ class GeneratorIterator {
   }
 
   next() {
-    return this.generator.generate(this.chance, this.context);
+    this.generated = this.generator.generate(this.chance, this.context);
+    return this.generated;
   }
 }
 

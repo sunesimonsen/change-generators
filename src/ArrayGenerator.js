@@ -18,14 +18,14 @@ class ArrayGenerator extends Generator {
     }
   }
 
-  shrink(items) {
+  shrink(items, context) {
     if (items.length === 0) {
       return new ConstantGenerator([]);
     }
 
     const itemGenerator = this.options.itemGenerator;
     if (itemGenerator.shrink) {
-      items = items.map(item => itemGenerator.shrink(item));
+      items = items.map(item => itemGenerator.shrink(item, context));
     }
 
     return new ArraySplicerGenerator(items, {
@@ -33,7 +33,7 @@ class ArrayGenerator extends Generator {
     });
   }
 
-  expand(items) {
+  expand(items, context) {
     const { itemGenerator, min, max } = this.options;
 
     return new PicksetGenerator([itemGenerator, ...items], {

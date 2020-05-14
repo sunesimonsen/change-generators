@@ -36,7 +36,7 @@ class SequenceGenerator extends Generator {
     });
   }
 
-  expand(items) {
+  expand(items, context) {
     const { producer, max, initialValue } = this.options;
 
     if (items.length < max) {

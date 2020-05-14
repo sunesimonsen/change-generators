@@ -1,3 +1,5 @@
+const SimpleMap = require("./SimpleMap");
+
 class Context {
   get(key) {
     return this.data && this.data[key];
@@ -22,18 +24,18 @@ class Context {
 
   childContext(key) {
     if (!this.childContexts) {
-      this.childContexts = [];
+      this.childContexts = new SimpleMap();
     }
 
-    for (var i = 0; i < this.childContexts.length; i += 1) {
-      const entry = this.childContexts[i];
-      if (entry.key === key) {
-        return entry.context;
-      }
+    const childContext = this.childContexts.get(key);
+
+    if (childContext) {
+      return childContext;
     }
 
     const context = new Context();
-    this.childContexts.push({ key, context });
+    this.childContexts.set(key, context);
+
     return context;
   }
 }

@@ -13,23 +13,23 @@ class WeightedGenerator extends Generator {
     }
   }
 
-  shrink(item) {
-    if (this.lastUnwrappedValue === item && this.lastValue.shrink) {
-      return this.lastValue.shrink(item);
+  shrink(item, context) {
+    const lastValue = context.childContext(this).get("lastValue");
+
+    if (lastValue && lastValue.shrink) {
+      return lastValue.shrink(item, context);
     } else {
       return new ConstantGenerator(item);
     }
   }
 
-  expand(item) {
-    const isGeneratorItem = this.lastValue && this.lastValue.isGenerator;
+  expand(item, context) {
+    const lastValue = context.childContext(this).get("lastValue");
 
-    const expandableItem =
-      this.lastUnwrappedValue === item &&
-      isGeneratorItem &&
-      this.lastValue.expand;
-
-    const expandedItem = expandableItem ? this.lastValue.expand(item) : item;
+    const expandableItem = lastValue && lastValue.expand;
+    const expandedItem = expandableItem
+      ? lastValue.expand(item, context)
+      : item;
 
     const maxWeight = this.options.reduce(
       (result, [item, weight]) => Math.max(result, weight),
@@ -39,7 +39,7 @@ class WeightedGenerator extends Generator {
     const filteredOptions = expandableItem
       ? this.options
       : this.options.filter(
-          ([optionItem]) => optionItem !== item && optionItem !== this.lastValue
+          ([optionItem]) => optionItem !== item && optionItem !== lastValue
         );
 
     return new WeightedGenerator([
@@ -57,10 +57,11 @@ class WeightedGenerator extends Generator {
       weights.push(weight);
     });
 
-    this.lastValue = chance.weighted(items, weights);
-    this.lastUnwrappedValue = unwrap(this.lastValue, chance, context);
+    const value = chance.weighted(items, weights);
 
-    return this.lastUnwrappedValue;
+    context.childContext(this).set("lastValue", value);
+
+    return unwrap(value, chance, context);
   }
 }
 

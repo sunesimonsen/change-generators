@@ -14,15 +14,15 @@ class PicksetGenerator extends Generator {
     }
   }
 
-  shrink(items) {
+  shrink(items, context) {
     if (items.length === 0) {
       return new ConstantGenerator([]);
     }
 
+    const lastValue = context.childContext(this).get("lastValue");
+
     const shrinkableData =
-      items.length < 10 &&
-      items === this.lastUnwrappedValue &&
-      (this.lastValue || []).some(g => g && g.shrink);
+      items.length < 10 && (lastValue || []).some(g => g && g.shrink);
 
     let shrinkable = items.length < this.options.max || shrinkableData;
 
@@ -31,11 +31,11 @@ class PicksetGenerator extends Generator {
     }
 
     if (shrinkableData) {
-      items = this.lastValue.map(
-        (g, i) => (g && g.shrink ? g.shrink(items[i]) : items[i])
+      items = lastValue.map(
+        (g, i) => (g && g.shrink ? g.shrink(items[i], context) : items[i])
       );
     } else {
-      items = this.lastValue;
+      items = lastValue;
     }
 
     return new PicksetGenerator(items, {
@@ -44,7 +44,7 @@ class PicksetGenerator extends Generator {
     });
   }
 
-  expand(data) {
+  expand(data, context) {
     return this.map((items, chance) => {
       const margin = Math.max(
         Math.min(
@@ -88,13 +88,13 @@ class PicksetGenerator extends Generator {
   generate(chance, context) {
     const { items, min, max } = this.options;
 
-    this.lastValue = chance.pickset(items, chance.natural({ min, max }));
+    const value = chance.pickset(items, chance.natural({ min, max }));
 
-    this.lastUnwrappedValue = this.lastValue.map(
+    context.childContext(this).set("lastValue", value);
+
+    return value.map(
       item => (item && item.isGenerator ? item.generate(chance, context) : item)
     );
-
-    return this.lastUnwrappedValue;
   }
 }
 

@@ -29,20 +29,21 @@ describe("PrimitiveGenerator", () => {
 
   describe("shrink", () => {
     it("shrinks the primitive value", () => {
-      const value = generator.first();
+      const iterator = generator.values();
 
-      expect(value, "to equal", 9015);
-      expect(generator.shrink(value), "to shrink towards", 0);
+      expect(iterator.next(), "to equal", 9015);
+      expect(iterator, "to shrink towards", 0);
     });
   });
 
   describe("expand", () => {
     it("expands the primitive value", () => {
-      const value = generator.first();
+      const iterator = generator.values();
 
-      expect(value, "to equal", 9015);
+      expect(iterator.next(), "to equal", 9015);
 
-      expect(generator.expand(value), "to yield items", [
+      iterator.expand();
+      expect(iterator, "to yield items", [
         56,
         -6880,
         "Ej wocu ofaufjom be mabuj do lisib valbuunu bave dolbaw gokim sab.",

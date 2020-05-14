@@ -13,15 +13,14 @@ class ShuffleGenerator extends Generator {
     }
   }
 
-  shrink(items) {
-    const shrinkable =
-      items === this.lastUnwrappedValue &&
-      (this.lastValue || []).some(g => g && g.shrink);
+  shrink(items, context) {
+    const lastValue = context.childContext(this).get("lastValue");
+    const shrinkable = (lastValue || []).some(g => g && g.shrink);
 
     if (shrinkable) {
       return new ShuffleGenerator(
-        this.lastValue.map(
-          (g, i) => (g && g.shrink ? g.shrink(items[i]) : items[i])
+        lastValue.map(
+          (g, i) => (g && g.shrink ? g.shrink(items[i], context) : items[i])
         )
       );
     } else {
@@ -29,7 +28,7 @@ class ShuffleGenerator extends Generator {
     }
   }
 
-  expand(items) {
+  expand(items, context) {
     return new WeightedGenerator([
       [this, 1],
       [new ConstantGenerator(items), 1.5]
@@ -39,13 +38,13 @@ class ShuffleGenerator extends Generator {
   generate(chance, context) {
     const { items } = this.options;
 
-    this.lastValue = chance.shuffle(items);
+    const value = chance.shuffle(items);
 
-    this.lastUnwrappedValue = this.lastValue.map(
+    context.childContext(this).set("lastValue", value);
+
+    return value.map(
       item => (item && item.isGenerator ? item.generate(chance, context) : item)
     );
-
-    return this.lastUnwrappedValue;
   }
 }
 
