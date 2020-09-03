@@ -42,7 +42,7 @@
     "pre-commit": "^1.2.2",
     "prettier": "~1.15.3",
     "prettier-package-json": "^1.4.0",
-    "serve": "^9.4.2",
+    "serve": "^11.3.2",
     "unexpected": "^10.37.1",
     "unexpected-documentation-site-generator": "^4.6.1",
     "unexpected-generator": "^0.1.1",
